@@ -83,9 +83,10 @@ class FindVolt
 
   def read_voltage
     #converting txt to csv in a correct format that can be read from.
-    #may need to add step to skip first few lines, if needed.
+    #may need to add step to skip first few lines if needed.
+    
     file_contents = File.read("volt_readings.txt").split(" ").map(&:strip)
-    nested = file_contents.each_slice(7).to_a
+    nested = file_contents.each_slice(6).to_a
     File.write("volt_readings.csv", nested.map(&:to_csv).join)
 
     header = nil
@@ -96,7 +97,7 @@ class FindVolt
             if i == 0 
                 header = row
             else
-                voltage = row[4]
+                voltage = row[3]
                 wrong_volt.push(row) if volt_wrong?(voltage) == true
             end
         end
@@ -112,7 +113,3 @@ temp_results.read_temp
 
 volt_results = FindVolt.new
 volt_results.read_voltage
-
-
-
-
