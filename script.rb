@@ -2,6 +2,10 @@ require "csv"
 require "date"
 
 class FindTemp
+
+  def initialize(max_temps = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    @max_temps = max_temps
+  end
     
   def save_results(temp_wrong, header = nil, results = nil)
       Dir.mkdir('results') unless Dir.exist?('results')
@@ -15,6 +19,8 @@ class FindTemp
           else
               csv << ["All good", "no readings to report."]
           end
+          csv << ["max:"]
+          csv << @max_temps
       end
   end
 
@@ -23,11 +29,17 @@ class FindTemp
     temperatures = array.drop(1)
     if temperatures.any? {|temp| temp.to_f >= 105.0000}
       true
-    elsif temperatures.any? {|temp| temp.to_f <= (ambient_temp - 2.0000)} #change the minus to a plus
+    elsif temperatures.any? {|temp| temp.to_f <= (ambient_temp + 2.0000)} 
       true
     else
       false
     end
+  end
+
+  def max_temp_calc(array)
+    array.map! {|temp| temp.to_f}
+    new_array = @max_temps.map.with_index {|temp, i| temp > array[i] ? temp : array[i]}
+    @max_temps = new_array
   end
 
   def read_temp
@@ -44,6 +56,7 @@ class FindTemp
               else
                   temp_array = [row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]]
                   wrong_temps.push(row) if temp_wrong?(temp_array) == true
+                  max_temp_calc(temp_array)
               end
           end
 
